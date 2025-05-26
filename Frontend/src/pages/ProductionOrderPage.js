@@ -2,9 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { getProductionOrder, deleteProductionOrderItem } from '../api/productionOrder';
 import {
-  Container, Typography, Table, TableBody, TableCell, TableHead, TableRow, IconButton
+  Container, Typography, Table, TableBody, TableCell, TableHead, TableRow, IconButton, Box, Button
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 
 const ProductionOrderPage = () => {
   const [items, setItems] = useState([]);
@@ -25,7 +26,16 @@ const ProductionOrderPage = () => {
 
   return (
     <Container>
-      <Typography variant="h4" mt={2}>Production Order</Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mt={2} mb={2}>
+        <Typography variant="h4">Production Order</Typography>
+        <Button
+          startIcon={<AddIcon />}
+          variant="contained"
+          onClick={() => window.location.href = '/inventory/create'}
+        >
+          New Production Order
+        </Button>
+      </Box>
       <Table>
         <TableHead>
           <TableRow>
