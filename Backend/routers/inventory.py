@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
-from models import Inventory
+from models import Inventory, ProductionOrder, ProductionOrderDetails
 from database import get_session
 from pydantic import BaseModel
 from typing import Optional, List
@@ -69,8 +69,32 @@ def add_to_inventory(item_id: int, payload: QuantityPayload, session: Session = 
     item = session.get(Inventory, item_id)
     if not item:
         raise HTTPException(status_code=404, detail="Not found")
+    
+    productionOrderDetails = session.exec(
+        select(ProductionOrderDetails)
+        .where(ProductionOrderDetails.product_id == item_id)
+        .where(ProductionOrderDetails.quantity_locked < ProductionOrderDetails.quantity_required)
+        .join(ProductionOrder, ProductionOrder.id == ProductionOrderDetails.order_id)
+        .where(ProductionOrder.status.in_(["In Progress", "Planned"]))
+        .order_by(ProductionOrder.date.desc())
+    ).all()
+
+    if productionOrderDetails:
+        for detail in productionOrderDetails:
+            if payload.quantity <= 0:
+                break
+            quantity_to_lock = min(detail.quantity_required - detail.quantity_locked, payload.quantity)
+            detail.quantity_locked += quantity_to_lock
+            payload.quantity -= quantity_to_lock
+            if detail.quantity_locked == detail.quantity_required:
+                detail.status = "Completed"
+
+            item.quantity_locked += quantity_to_lock
+            session.add(detail)
+    
     item.quantity_on_hand += payload.quantity
     session.add(item)
+
     session.commit()
     session.refresh(item)
     return item
