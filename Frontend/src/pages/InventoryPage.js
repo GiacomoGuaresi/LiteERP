@@ -100,18 +100,16 @@ const InventoryPage = () => {
 
   return (
     <Container>
-      <Typography variant="h4" mt={2}>Inventory</Typography>
-
-      <Button
-        variant="contained"
-        color="primary"
-        startIcon={<AddIcon />}
-        sx={{ mt: 2, mb: 2 }}
-        onClick={() => window.location.href = '/inventory/create'}
-      >
-        New Item
-      </Button>
-
+      <Box display="flex" justifyContent="space-between" alignItems="center" mt={2} mb={2}>
+        <Typography variant="h4">Inventory</Typography>
+        <Button
+          startIcon={<AddIcon />}
+          variant="contained"
+          onClick={() => window.location.href = '/inventory/create'}
+        >
+          New Item
+        </Button>
+      </Box>
       <TextField
         label="Search by Code"
         variant="outlined"
@@ -128,7 +126,7 @@ const InventoryPage = () => {
           <CircularProgress />
         </Box>
       ) : (
-        <Grid container spacing={2}>
+        <Grid container spacing={2} sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           {filteredItems.map(item => (
             <Grid item xs={12} sm={6} md={4} key={item.ID}>
               <Card>

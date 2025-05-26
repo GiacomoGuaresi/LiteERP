@@ -1,9 +1,8 @@
 // src/pages/BomPage.js
 import React, { useEffect, useState } from 'react';
 import {
-  Container, Typography, Card, CardContent, CardActions,
-  IconButton, Button, Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField, Grid, MenuItem, Box
+  Container, Typography, Card, CardContent, CardActions, IconButton, Button,
+  Dialog, DialogTitle, DialogContent, DialogActions, Grid, TextField, Box, MenuItem
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -15,6 +14,7 @@ import {
 } from '../api/bom';
 
 const BomPage = () => {
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [boms, setBoms] = useState([]);
   const [inventoryMap, setInventoryMap] = useState({});
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -25,6 +25,7 @@ const BomPage = () => {
   const [newQty, setNewQty] = useState(1);
   const [selectedBOM, setSelectedBOM] = useState(null);
   const [inventoryItems, setInventoryItems] = useState([]);
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   useEffect(() => {
     loadAll();
@@ -73,11 +74,6 @@ const BomPage = () => {
     loadAll();
   };
 
-  const handleDelete = async (bomId) => {
-    await deleteBOM(bomId);
-    loadAll();
-  };
-
   const handleOpenEdit = (bom) => {
     setSelectedBOM(bom);
     setNewQty(bom.quantity);
@@ -93,6 +89,23 @@ const BomPage = () => {
     loadAll();
   };
 
+
+  const confirmDelete = (id) => {
+    setItemToDelete(id);
+    setConfirmOpen(true);
+  };
+
+  const performDelete = async () => {
+    if (itemToDelete) {
+      loadAll();
+      await deleteBOM(itemToDelete);
+      setConfirmOpen(false);
+      setItemToDelete(null);
+      loadAll();
+    }
+  };
+
+
   return (
     <Container>
       <Box display="flex" justifyContent="space-between" alignItems="center" mt={2} mb={2}>
@@ -102,7 +115,7 @@ const BomPage = () => {
           variant="contained"
           onClick={() => handleOpenDialog(null)}
         >
-          New Parent
+          BOM
         </Button>
       </Box>
 
@@ -126,7 +139,7 @@ const BomPage = () => {
                     </CardContent>
                     <CardActions>
                       <IconButton size="small" onClick={() => handleOpenEdit(child)}><EditIcon fontSize="small" /></IconButton>
-                      <IconButton size="small" onClick={() => handleDelete(child.ID)}><DeleteIcon fontSize="small" /></IconButton>
+                      <IconButton size="small" onClick={() => confirmDelete(child.ID)}><DeleteIcon fontSize="small" /></IconButton>
                     </CardActions>
                   </Card>
                 </Grid>
@@ -146,13 +159,13 @@ const BomPage = () => {
 
       {/* Add Child Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-        <DialogTitle>{newParentMode ? 'Create New Parent' : 'Add Child Item'}</DialogTitle>
+        <DialogTitle>{newParentMode ? 'Create BOM' : 'Add Child Item'}</DialogTitle>
         <DialogContent>
           {newParentMode && (
             <TextField
               select
               fullWidth
-              label="New Parent Product"
+              label="BOM Product"
               value={newChild}
               onChange={(e) => setNewChild(e.target.value)}
               sx={{ mt: 2 }}
@@ -209,11 +222,20 @@ const BomPage = () => {
             onChange={(e) => setNewQty(e.target.value)}
             fullWidth
             inputProps={{ min: 1 }}
+            sx={{ mt: 1 }}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditDialogOpen(false)}>Cancel</Button>
           <Button onClick={handleUpdateQuantity} variant="contained">Save</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>Are you sure you want to delete this item?</DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
+          <Button onClick={performDelete} color="error">Delete</Button>
         </DialogActions>
       </Dialog>
     </Container>
