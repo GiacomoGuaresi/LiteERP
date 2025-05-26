@@ -94,21 +94,32 @@ def delete(item_id: int, session: Session = Depends(get_session)):
     session.commit()
     return {"ok": True}
 
-@router.post("/{item_id}/start")
-def start_production_order(item_id: int, session: Session = Depends(get_session)):
+@router.post("/{item_id}/updateStatus", response_model=ProductionOrder)
+def update_status(item_id: int, new_status: str, session: Session = Depends(get_session)):
+    valid_statuses = ["Planned", "In Progress", "Completed"]
+    if new_status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Invalid status: {new_status}. Valid statuses are: {valid_statuses}")
+    
     item = session.get(ProductionOrder, item_id)
     if not item:
         raise HTTPException(status_code=404, detail="Not found")
     
-    if item.status != "Planned":
-        raise HTTPException(status_code=400, detail="Production order is not in a valid state to start")
+    # check if status can be updated Planned -> In Progress -> Completed
+    if item.status == "Completed":
+        raise HTTPException(status_code=400, detail="Production order is already completed")
+    if item.status == "In Progress" and new_status == "Planned":
+        raise HTTPException(status_code=400, detail="Cannot revert status from In Progress to Planned")
+    if item.status == "Planned" and new_status == "Completed":
+        raise HTTPException(status_code=400, detail="Cannot complete a production order that is still planned")
+    if item.status == new_status:
+        raise HTTPException(status_code=400, detail=f"Production order is already in status: {new_status}")
 
     # update sub-orders
     sub_orders = session.query(ProductionOrder).filter(ProductionOrder.parentProductionOrderDetailsID == item_id).all()
     for sub_order in sub_orders:
-        start_production_order(sub_order.ID, session)
+        update_status(sub_order.ID, session, new_status)
 
-    item.status = "In Progress"
+    item.status = new_status
     session.add(item)
     session.commit()
     session.refresh(item)
