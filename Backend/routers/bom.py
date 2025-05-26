@@ -44,7 +44,7 @@ def delete(item_id: int, session: Session = Depends(get_session)):
     session.commit()
     return {"ok": True}
 
-@router.get("/bom/children/{parent_id}", response_model=list[BillOfMaterials])
+@router.get("/{parent_id}/children", response_model=list[BillOfMaterials])
 def get_bom_children(parent_id: int, db: Session = Depends(get_session)):
     results = db.query(BillOfMaterials).filter(BillOfMaterials.parentProductID == parent_id).all()
     return results
