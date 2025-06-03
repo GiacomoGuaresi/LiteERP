@@ -2,14 +2,14 @@
 import React, { useEffect, useState } from 'react';
 import {
   Container, Typography, Card, CardContent, CardActions, IconButton, Button,
-  Dialog, DialogTitle, DialogContent, DialogActions, Grid, TextField, MenuItem, Box
+  Dialog, DialogTitle, DialogContent, DialogActions, Grid, TextField, MenuItem, Box, FormControlLabel, Checkbox
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
 import { getProductionOrders, createProductionOrderItem, deleteProductionOrderItem } from '../api/productionOrder';
-import { getInventoryIDsAndCodes } from '../api/inventory';
+import { getInventory } from '../api/inventory';
 import { useNavigate } from 'react-router-dom';
 
 const ProductionOrdersPage = () => {
@@ -28,6 +28,12 @@ const ProductionOrdersPage = () => {
   });
   const [itemToDelete, setItemToDelete] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    onlyMine: false,
+    showInProgress: true,
+    showPlanned: false,
+    showCompleted: false,
+  });
 
   const navigate = useNavigate();
 
@@ -38,7 +44,7 @@ const ProductionOrdersPage = () => {
   const loadData = async () => {
     const [orderRes, inventoryRes] = await Promise.all([
       getProductionOrders(),
-      getInventoryIDsAndCodes()
+      getInventory()
     ]);
 
     const invMap = {};
@@ -99,29 +105,99 @@ const ProductionOrdersPage = () => {
         </Button>
       </Box>
 
+      <Box display="flex" flexWrap="wrap" gap={2} mb={2}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={filters.onlyMine}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, onlyMine: e.target.checked }))
+              }
+            />
+          }
+          label="Mostra solo ordini di produzione propri"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={filters.showInProgress}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, showInProgress: e.target.checked }))
+              }
+            />
+          }
+          label="Mostra ordini In Progress"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={filters.showPlanned}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, showPlanned: e.target.checked }))
+              }
+            />
+          }
+          label="Mostra ordini Planned"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={filters.showCompleted}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, showCompleted: e.target.checked }))
+              }
+            />
+          }
+          label="Mostra ordini Completed"
+        />
+      </Box>
+
       <Grid container spacing={2}>
-        {orders.map(order => (
-          <Grid item xs={12} sm={6} md={4} key={order.ID}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">{inventoryMap[order.productID] || `ID ${order.productID}`}</Typography>
-                <Typography>{order.date}</Typography>
-                <Typography>{order.status}</Typography>
-                <Typography>{order.quantityProduced} / {order.quantityRequested}</Typography>
-              </CardContent>
-              <CardActions>
-                <IconButton onClick={() => navigate(`/productionOrder/${order.ID}`)}>
-                  <VisibilityIcon />
-                </IconButton>
-                {order.status !== 'Completed' && (
-                  <IconButton onClick={() => confirmDelete(order.ID)}>
-                    <DeleteIcon color="error" />
+        {orders
+          .filter(order => {
+            if (
+              (order.status === 'In Progress' && filters.showInProgress) ||
+              (order.status === 'Planned' && filters.showPlanned) ||
+              (order.status === 'Completed' && filters.showCompleted)
+            ) {
+              // Qui potresti aggiungere la logica per `onlyMine` in futuro
+              return true;
+            }
+            return false;
+          })
+          .map(order => (
+            <Grid item xs={12} sm={6} md={4} key={order.ID}>
+              <Card>
+                <CardContent>
+                  {(() => {
+                    const item = inventoryItems.find(i => i.ID === order.productID);
+                    return item?.image ? (
+                      <Box
+                        component="img"
+                        src={item.image}
+                        alt={item.code}
+                        sx={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 1, mb: 1 }}
+                      />
+                    ) : null;
+                  })()}
+                  <Typography variant="h6">{inventoryMap[order.productID] || `ID ${order.productID}`}</Typography>
+                  <Typography>{order.date}</Typography>
+                  <Typography>{order.status}</Typography>
+                  <Typography>{order.quantityProduced} / {order.quantityRequested}</Typography>
+                </CardContent>
+                <CardActions>
+                  <IconButton onClick={() => navigate(`/productionOrder/${order.ID}`)}>
+                    <VisibilityIcon />
                   </IconButton>
-                )}
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
+                  {order.status !== 'Completed' && (
+                    <IconButton onClick={() => confirmDelete(order.ID)}>
+                      <DeleteIcon color="error" />
+                    </IconButton>
+                  )}
+                </CardActions>
+              </Card>
+            </Grid>
+          ))}
       </Grid>
 
       {/* Dialog nuovo ordine */}

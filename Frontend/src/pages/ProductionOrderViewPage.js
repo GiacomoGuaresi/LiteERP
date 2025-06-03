@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import {
   Container, Typography, Card, CardContent, CardActions, IconButton,
-  Button, TextField, Grid, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Box
+  Button, TextField, Grid, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Box,
+  Stepper, Step, StepLabel
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -18,7 +19,7 @@ import {
   updateProductionOrderDetail, deleteProductionOrderDetail
 } from '../api/productionOrderDetail';
 
-import { getInventoryIDsAndCodes } from '../api/inventory';
+import { getInventory } from '../api/inventory';
 
 const ProductionOrderView = () => {
   const { id } = useParams(); // order ID
@@ -33,7 +34,7 @@ const ProductionOrderView = () => {
     const [orderRes, detailsRes, inventoryRes] = await Promise.all([
       getProductionOrder(id),
       getProductionOrderDetails(id),
-      getInventoryIDsAndCodes()
+      getInventory()
     ]);
 
     const invMap = {};
@@ -86,67 +87,71 @@ const ProductionOrderView = () => {
         <Box mb={4}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Date"
-                type="date"
-                value={order.date}
-                disabled
-                InputLabelProps={{ shrink: true }}
-              />
+              <Typography variant="subtitle2" color="text.secondary">Date</Typography>
+              <Typography variant="body1" gutterBottom>{order.date}</Typography>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Status"
-                value={order.status}
-                disabled
-              />
+              <Typography variant="subtitle2" color="text.secondary">Quantity Requested</Typography>
+              <Typography variant="body1" gutterBottom>{order.quantityRequested}</Typography>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField
-                label="Quantity Requested"
-                fullWidth
-                value={order.quantityRequested}
-                disabled
-              />
+              <Typography variant="subtitle2" color="text.secondary">User IDs</Typography>
+              <Typography variant="body1" gutterBottom>{order.userIDs || '-'}</Typography>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="User IDs"
-                fullWidth
-                value={order.userIDs || ''}
-                disabled
-              />
-            </Grid>
+          </Grid>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
+              <Typography variant="subtitle2" color="text.secondary">Notes</Typography>
               <TextField
-                label="Notes"
                 fullWidth
                 multiline
                 minRows={3}
                 value={order.notes || ''}
-                disabled
+                onChange={(e) => setOrder({ ...order, notes: e.target.value })}
               />
+              <Box mt={1}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<SaveIcon />}
+                  onClick={async () => {
+                    await updateProductionOrderStatusItem(id, order.status, { notes: order.notes });
+                    loadAll();
+                  }}
+                >
+                  Save Notes
+                </Button>
+              </Box>
             </Grid>
           </Grid>
-
-          {order.status !== 'Completed' && (
-            <Box mt={2}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={async () => {
-                  await updateProductionOrderStatusItem(id, order.status === 'Planned' ? 'In Progress' : 'Completed');
-                  loadAll(); // ricarica i dati aggiornati
-                }}
-              >
-                Promote to {order.status === 'Planned' ? 'In Progress' : 'Completed'}
-              </Button>
-            </Box>
-          )}
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Typography variant="subtitle2" color="text.secondary">Status</Typography>
+              <Stepper activeStep={['Planned', 'In Progress', 'Completed'].indexOf(order.status)} alternativeLabel>
+                {['Planned', 'In Progress', 'Completed'].map(label => (
+                  <Step key={label}>
+                    <StepLabel>{label}</StepLabel>
+                  </Step>
+                ))}
+              </Stepper>
+              {order.status !== 'Completed' && (
+                <Box mt={2}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={async () => {
+                      const nextStatus = order.status === 'Planned' ? 'In Progress' : 'Completed';
+                      await updateProductionOrderStatusItem(id, nextStatus);
+                      loadAll();
+                    }}
+                  >
+                    Promote to {order.status === 'Planned' ? 'In Progress' : 'Completed'}
+                  </Button>
+                </Box>
+              )}
+            </Grid>
+          </Grid>
         </Box>
-
       )}
 
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -164,6 +169,17 @@ const ProductionOrderView = () => {
           <Grid item xs={12} sm={6} md={4} key={detail.ID}>
             <Card>
               <CardContent>
+                {(() => {
+                  const item = inventoryItems.find(i => i.ID === detail.productID);
+                  return item?.image ? (
+                    <Box
+                      component="img"
+                      src={item.image}
+                      alt={item.code}
+                      sx={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 1, mb: 1 }}
+                    />
+                  ) : null;
+                })()}
                 <Typography variant="body1">
                   {inventoryMap[detail.productID] || `ID ${detail.productID}`}
                 </Typography>
