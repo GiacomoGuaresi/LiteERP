@@ -10,6 +10,7 @@ import InventoryEditPage from './pages/InventoryEditPage';
 import InventoryCreatePage from './pages/InventoryCreatePage';
 
 import ProductionOrderPage from './pages/ProductionOrderPage';
+import ProductionOrderViewPage from './pages/ProductionOrderViewPage';
 
 import BomPage from './pages/BomPage';
 
@@ -25,6 +26,7 @@ function App() {
         <Route path="/inventory/create" element={<InventoryCreatePage />} />
 
         <Route path="/ProductionOrder" element={<ProductionOrderPage />} />
+        <Route path="/ProductionOrder/:id" element={<ProductionOrderViewPage />} />
 
         <Route path="/BOM" element={<BomPage />} />
       </Routes>
