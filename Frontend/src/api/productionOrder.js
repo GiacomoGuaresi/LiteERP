@@ -13,3 +13,4 @@ export const updateProductionOrderStatusItem = (id, newStatus) => {
     new_status: newStatus
   });
 };
+export const getProductionOrderDetailsItems = (id) => axios.get(`${API_URL}/orders/${id}/details`);

@@ -12,10 +12,10 @@ import SaveIcon from '@mui/icons-material/Save';
 
 import { useParams } from 'react-router-dom';
 import {
-  getProductionOrder, updateProductionOrderStatusItem
+  getProductionOrder, updateProductionOrderStatusItem, getProductionOrderDetailsItems
 } from '../api/productionOrder';
 import {
-  getProductionOrderDetails, createProductionOrderDetail,
+  createProductionOrderDetail,
   updateProductionOrderDetail, deleteProductionOrderDetail
 } from '../api/productionOrderDetail';
 
@@ -33,7 +33,7 @@ const ProductionOrderView = () => {
   const loadAll = async () => {
     const [orderRes, detailsRes, inventoryRes] = await Promise.all([
       getProductionOrder(id),
-      getProductionOrderDetails(id),
+      getProductionOrderDetailsItems(id),
       getInventory()
     ]);
 
