@@ -78,29 +78,54 @@ const ProductionOrderView = () => {
   };
 
   return (
-    <Container>
-      <Box mt={3} mb={3}>
+    <Container fullWidth>
+      <Box mt={3} mb={3} maxWidth="xl">
         <Typography variant="h4">Production Order #{id}</Typography>
       </Box>
 
       {order && (
-        <Box mb={4}>
+        <Box mb={4} maxWidth="xl">
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid size={12}>
+              <Typography variant="subtitle2" color="text.secondary">Status</Typography>
+              <Stepper activeStep={['Planned', 'In Progress', 'Completed'].indexOf(order.status)} alternativeLabel>
+                {['Planned', 'In Progress', 'Completed'].map(label => (
+                  <Step key={label}>
+                    <StepLabel>{label}</StepLabel>
+                  </Step>
+                ))}
+              </Stepper>             
+            </Grid>
+            <Grid size={12}>
               <Typography variant="subtitle2" color="text.secondary">Date</Typography>
               <Typography variant="body1" gutterBottom>{order.date}</Typography>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={12}>
               <Typography variant="subtitle2" color="text.secondary">Quantity Requested</Typography>
               <Typography variant="body1" gutterBottom>{order.quantityRequested}</Typography>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={12}>
               <Typography variant="subtitle2" color="text.secondary">User IDs</Typography>
               <Typography variant="body1" gutterBottom>{order.userIDs || '-'}</Typography>
             </Grid>
-          </Grid>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
+            <Grid size={12}>
+              {order.status !== 'Completed' && (
+                <Box mt={2}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={async () => {
+                      const nextStatus = order.status === 'Planned' ? 'In Progress' : 'Completed';
+                      await updateProductionOrderStatusItem(id, nextStatus);
+                      loadAll();
+                    }}
+                  >
+                    Promote to {order.status === 'Planned' ? 'In Progress' : 'Completed'}
+                  </Button>
+                </Box>
+              )}
+            </Grid>
+                        <Grid size={12}>
               <Typography variant="subtitle2" color="text.secondary">Notes</Typography>
               <TextField
                 fullWidth
@@ -122,33 +147,6 @@ const ProductionOrderView = () => {
                   Save Notes
                 </Button>
               </Box>
-            </Grid>
-          </Grid>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Typography variant="subtitle2" color="text.secondary">Status</Typography>
-              <Stepper activeStep={['Planned', 'In Progress', 'Completed'].indexOf(order.status)} alternativeLabel>
-                {['Planned', 'In Progress', 'Completed'].map(label => (
-                  <Step key={label}>
-                    <StepLabel>{label}</StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
-              {order.status !== 'Completed' && (
-                <Box mt={2}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={async () => {
-                      const nextStatus = order.status === 'Planned' ? 'In Progress' : 'Completed';
-                      await updateProductionOrderStatusItem(id, nextStatus);
-                      loadAll();
-                    }}
-                  >
-                    Promote to {order.status === 'Planned' ? 'In Progress' : 'Completed'}
-                  </Button>
-                </Box>
-              )}
             </Grid>
           </Grid>
         </Box>

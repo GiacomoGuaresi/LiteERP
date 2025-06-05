@@ -22,8 +22,6 @@ const theme = createTheme({
   palette: {
     primary: {
       main: '#d72e28',
-      light: '#80e27e',
-      dark: '#087f23',
       contrastText: '#fff',
     },
   },
@@ -31,8 +29,8 @@ const theme = createTheme({
 
 function App() {
    return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline /> {/* Per reset degli stili Material UI */}
+     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <Router>
         <Navbar />
         <Routes>
