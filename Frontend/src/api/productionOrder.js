@@ -8,4 +8,8 @@ export const getProductionOrder = (id) => axios.get(`${API_URL}/orders/${id}`);
 export const createProductionOrderItem = (data) => axios.post(`${API_URL}/orders/`, data);
 export const deleteProductionOrderItem = (id) => axios.delete(`${API_URL}/orders/${id}`);
 export const updateProductionOrderItem = (id, data) => axios.put(`${API_URL}/orders/${id}`, data);
-export const updateProductionOrderStatusItem = (id, newStatus) => axios.post(`${API_URL}/orders/${id}/updateStatus`, newStatus);
+export const updateProductionOrderStatusItem = (id, newStatus) => {
+  return axios.post(`${API_URL}/orders/${id}/updateStatus`, {
+    new_status: newStatus
+  });
+};

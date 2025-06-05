@@ -94,7 +94,7 @@ const ProductionOrderView = () => {
                     <StepLabel>{label}</StepLabel>
                   </Step>
                 ))}
-              </Stepper>             
+              </Stepper>
             </Grid>
             <Grid size={12}>
               <Typography variant="subtitle2" color="text.secondary">Date</Typography>
@@ -109,23 +109,23 @@ const ProductionOrderView = () => {
               <Typography variant="body1" gutterBottom>{order.userIDs || '-'}</Typography>
             </Grid>
             <Grid size={12}>
-              {order.status !== 'Completed' && (
+              {order.status === 'Planned' && (
                 <Box mt={2}>
                   <Button
                     variant="contained"
                     color="primary"
                     onClick={async () => {
-                      const nextStatus = order.status === 'Planned' ? 'In Progress' : 'Completed';
+                      const nextStatus = 'In Progress';
                       await updateProductionOrderStatusItem(id, nextStatus);
                       loadAll();
                     }}
                   >
-                    Promote to {order.status === 'Planned' ? 'In Progress' : 'Completed'}
+                    Promote to In Progress
                   </Button>
                 </Box>
               )}
             </Grid>
-                        <Grid size={12}>
+            <Grid size={12}>
               <Typography variant="subtitle2" color="text.secondary">Notes</Typography>
               <TextField
                 fullWidth

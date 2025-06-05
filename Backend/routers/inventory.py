@@ -88,7 +88,7 @@ def add_to_inventory(item_id: int, payload: QuantityPayload, session: Session = 
                 copyOfquantity -= quantity_just_produced
                 
                 if(order.quantityProduced >= order.quantityRequested):
-                    production_order.update_status(order.ID, "Completed", session=session)
+                    production_order.update_production_order_status_backend(order.ID, "Completed", session)
 
                 session.add(order)
 
