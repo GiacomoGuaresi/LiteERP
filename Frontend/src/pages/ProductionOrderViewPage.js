@@ -12,7 +12,8 @@ import SaveIcon from '@mui/icons-material/Save';
 
 import { useParams } from 'react-router-dom';
 import {
-  getProductionOrder, updateProductionOrderStatusItem, getProductionOrderDetailsItems
+  getProductionOrder, updateProductionOrderStatusItem, getProductionOrderDetailsItems,
+  updateProductionOrderItem
 } from '../api/productionOrder';
 import {
   createProductionOrderDetail,
@@ -20,33 +21,56 @@ import {
 } from '../api/productionOrderDetail';
 
 import { getInventory } from '../api/inventory';
+import { getInventoryItem } from '../api/inventory';
 
 const ProductionOrderView = () => {
   const { id } = useParams(); // order ID
   const [order, setOrder] = useState(null);
+  const [product, setProduct] = useState(null);
   const [details, setDetails] = useState([]);
   const [inventoryItems, setInventoryItems] = useState([]);
   const [inventoryMap, setInventoryMap] = useState({});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingDetail, setEditingDetail] = useState(null);
+  const [lastEdited, setLastEdited] = useState(null);
 
   const loadAll = async () => {
+    // Prima carichi ordine, dettagli e inventario
     const [orderRes, detailsRes, inventoryRes] = await Promise.all([
       getProductionOrder(id),
       getProductionOrderDetailsItems(id),
       getInventory()
     ]);
 
+    const orderData = orderRes.data;
+
+    // Solo dopo aver ottenuto l'ordine, puoi accedere a orderData.productID
+    const orderProduct = await getInventoryItem(orderData.productID);
+
+    // Crea la mappa inventario
     const invMap = {};
     inventoryRes.data.forEach(item => {
       invMap[item.ID] = item.code;
     });
 
-    setOrder(orderRes.data);
+    // Imposta tutti gli stati
+    setOrder(orderData);
     setDetails(detailsRes.data);
     setInventoryItems(inventoryRes.data);
     setInventoryMap(invMap);
+    setProduct(orderProduct.data);
   };
+
+  useEffect(() => {
+    if (order) {
+      const handler = setTimeout(async () => {
+        await updateProductionOrderItem(id, order);
+        setLastEdited(new Date());
+      }, 1000); // salva 1 secondo dopo l'ultima modifica
+
+      return () => clearTimeout(handler); // cancella timeout se cambia di nuovo prima
+    }
+  }, [order?.notes]);
 
   useEffect(() => {
     loadAll();
@@ -80,7 +104,7 @@ const ProductionOrderView = () => {
   return (
     <Container fullWidth>
       <Box mt={3} mb={3} maxWidth="xl">
-        <Typography variant="h4">Production Order #{id}</Typography>
+        <Typography variant="h4">Production Order {product ? product.code : 'Loading...'}</Typography>
       </Box>
 
       {order && (
@@ -95,6 +119,10 @@ const ProductionOrderView = () => {
                   </Step>
                 ))}
               </Stepper>
+            </Grid>
+            <Grid size={12}>
+              <Typography variant="subtitle2" color="text.secondary">Order number</Typography>
+              <Typography variant="body1" gutterBottom>{order.id}</Typography>
             </Grid>
             <Grid size={12}>
               <Typography variant="subtitle2" color="text.secondary">Date</Typography>
@@ -131,22 +159,14 @@ const ProductionOrderView = () => {
                 fullWidth
                 multiline
                 minRows={3}
-                value={order.notes || ''}
+                value={order?.notes || ''}
                 onChange={(e) => setOrder({ ...order, notes: e.target.value })}
               />
-              <Box mt={1}>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  startIcon={<SaveIcon />}
-                  onClick={async () => {
-                    await updateProductionOrderStatusItem(id, order.status, { notes: order.notes });
-                    loadAll();
-                  }}
-                >
-                  Save Notes
-                </Button>
-              </Box>
+              {lastEdited && (
+                <Typography variant="caption" color="text.secondary">
+                  Last edited: {lastEdited.toLocaleString()}
+                </Typography>
+              )}
             </Grid>
           </Grid>
         </Box>
