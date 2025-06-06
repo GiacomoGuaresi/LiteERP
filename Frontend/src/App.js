@@ -8,6 +8,7 @@ import InventoryPage from './pages/InventoryPage';
 import InventoryViewPage from './pages/InventoryViewPage';
 import InventoryEditPage from './pages/InventoryEditPage';
 import InventoryCreatePage from './pages/InventoryCreatePage';
+import InventoryScanPage from './pages/InventoryScanPage';
 
 import ProductionOrderPage from './pages/ProductionOrderPage';
 import ProductionOrderViewPage from './pages/ProductionOrderViewPage';
@@ -39,6 +40,7 @@ function App() {
           <Route path="/inventory/edit/:id" element={<InventoryEditPage />} />
           <Route path="/inventory/view/:id" element={<InventoryViewPage />} />
           <Route path="/inventory/create" element={<InventoryCreatePage />} />
+          <Route path="/inventory/scanner" element={<InventoryScanPage />} />
 
           <Route path="/ProductionOrder" element={<ProductionOrderPage />} />
           <Route path="/ProductionOrder/:id" element={<ProductionOrderViewPage />} />
