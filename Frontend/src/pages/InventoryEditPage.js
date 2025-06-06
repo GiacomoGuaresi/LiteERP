@@ -71,7 +71,7 @@ const InventoryEditPage = () => {
                     <Select name="category" value={item.category} onChange={handleChange} label="Category" required>
                         <MenuItem value="Product">Product</MenuItem>
                         <MenuItem value="Component">Component</MenuItem>
-                        <MenuItem value="Printed part">Printed part</MenuItem>
+                        <MenuItem value="PrintedPart">PrintedPart</MenuItem>
                         <MenuItem value="Subassembly">Subassembly</MenuItem>
                     </Select>
                 </FormControl>

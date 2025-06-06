@@ -8,7 +8,7 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-import { getInventoryIDsAndCodes } from '../api/inventory';
+import { getInventoryLight } from '../api/inventory';
 import {
   getBOMs, deleteBOM, updateBOM, createBOM
 } from '../api/bom';
@@ -34,7 +34,7 @@ const BomPage = () => {
   const loadAll = async () => {
     const [bomRes, invRes] = await Promise.all([
       getBOMs(),
-      getInventoryIDsAndCodes()
+      getInventoryLight()
     ]);
 
     const invMap = {};

@@ -11,10 +11,10 @@ export const updateInventoryItem = (id, data) => axios.put(`${API_URL}/inventory
 export const addToInventory = (id, quantity) => axios.post(`${API_URL}/inventory/${id}/add/`, { quantity });
 export const addToInventoryByCode = (code, quantity) => axios.post(`${API_URL}/inventory/${code}/addbycode/`, { quantity });
 export const removeFromInventory = (id, quantity) => axios.post(`${API_URL}/inventory/${id}/remove/`, { quantity });
-export const getInventoryIDsAndCodes = () => {
+export const getInventoryLight = () => {
   const response = axios.get(`${API_URL}/inventory/`, {
     params: {
-      fields: 'ID,code'
+      fields: 'ID,code,category'
     }
   });
   return response;

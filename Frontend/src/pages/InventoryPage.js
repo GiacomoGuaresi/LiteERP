@@ -10,6 +10,7 @@ import ViewIcon from '@mui/icons-material/Visibility';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import SearchIcon from '@mui/icons-material/Search';
+import BarcodeReaderIcon from '@mui/icons-material/BarcodeReader';
 import { CircularProgress } from '@mui/material';
 
 import { getInventory, deleteInventoryItem, addToInventory, removeFromInventory } from '../api/inventory';
@@ -102,13 +103,23 @@ const InventoryPage = () => {
     <Container>
       <Box display="flex" justifyContent="space-between" alignItems="center" mt={2} mb={2}>
         <Typography variant="h4">Inventory</Typography>
-        <Button
-          startIcon={<AddIcon />}
-          variant="contained"
-          onClick={() => window.location.href = '/inventory/create'}
-        >
-          New Item
-        </Button>
+        <div>
+          <Button
+            startIcon={<BarcodeReaderIcon />}
+            variant="contained"
+            onClick={() => window.location.href = '/inventory/scanner'}
+            sx={{ mx: 1 }}
+          >
+            Scanner Page
+          </Button>
+          <Button
+            startIcon={<AddIcon />}
+            variant="contained"
+            onClick={() => window.location.href = '/inventory/create'}
+          >
+            New Item
+          </Button>
+        </div>
       </Box>
       <TextField
         label="Search by Code"

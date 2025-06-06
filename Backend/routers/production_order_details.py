@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
-from models import ProductionOrderDetails
+from models import ProductionOrderDetails, ProductionOrder
 from database import get_session
+from typing import Optional
 
 router = APIRouter()
 
@@ -13,8 +14,19 @@ def create_productionOrderDetails(item: ProductionOrderDetails, session: Session
     return item
 
 @router.get("/", response_model=list[ProductionOrderDetails])
-def read_all(session: Session = Depends(get_session)):
-    return session.exec(select(ProductionOrderDetails)).all()
+def read_all(
+    status: Optional[str] = Query(default=None),
+    session: Session = Depends(get_session)
+):
+    query = select(ProductionOrderDetails).join(
+        ProductionOrder,
+        ProductionOrder.ID == ProductionOrderDetails.productionOrderID
+    )
+
+    if status:
+        query = query.where(ProductionOrder.status == status)
+
+    return session.exec(query).all()
 
 @router.get("/{item_id}", response_model=ProductionOrderDetails)
 def read_one(item_id: int, session: Session = Depends(get_session)):
