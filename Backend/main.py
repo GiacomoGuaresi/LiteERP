@@ -2,7 +2,33 @@ from fastapi import FastAPI
 from routers import inventory, bom, production_order, production_order_details, users, logs
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
+# Importa i modelli necessari per la configurazione OpenAPI/Swagger UI
+from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
+from fastapi.openapi.models import SecurityScheme as SecuritySchemeModel
+from fastapi.openapi.models import OAuthFlowPassword as OAuthFlowPasswordModel
+
+
+app = FastAPI(
+    title="Il mio API FastAPI",
+    description="Una semplice API per la gestione dell'inventario e degli ordini di produzione.",
+    version="1.0.0",
+    # Qui aggiungiamo la configurazione di sicurezza per Swagger UI
+    openapi_extra={
+        "components": {
+            "securitySchemes": {
+                "BearerAuth": {
+                    "type": "http",
+                    "scheme": "bearer",
+                    "bearerFormat": "JWT",
+                    "description": "JWT Authorization header using the Bearer scheme. Enter your JWT token (e.g. `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImV4cCI6MTY3ODkzMDYwN30.YOUR_TOKEN`)",
+                }
+            }
+        },
+        "security": [
+            {"BearerAuth": []}
+        ]
+    }
+)
 
 app.include_router(inventory.router, prefix="/inventory", tags=["Inventory"])
 app.include_router(bom.router, prefix="/bom", tags=["Bill of Materials"])
