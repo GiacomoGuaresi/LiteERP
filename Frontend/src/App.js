@@ -2,7 +2,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import { AuthContextProvider } from './contexts/AuthContext'; // Importa AuthContextProvider
+
 import Dashboard from './pages/Dashboard';
+
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
 import InventoryPage from './pages/InventoryPage';
 import InventoryViewPage from './pages/InventoryViewPage';
@@ -29,26 +34,33 @@ const theme = createTheme({
 });
 
 function App() {
-   return (
-     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/inventory" element={<InventoryPage />} />
-          <Route path="/inventory/edit/:id" element={<InventoryEditPage />} />
-          <Route path="/inventory/view/:id" element={<InventoryViewPage />} />
-          <Route path="/inventory/create" element={<InventoryCreatePage />} />
-          <Route path="/inventory/scanner" element={<InventoryScanPage />} />
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        {/* Avvolgi il Router con AuthContextProvider per fornire il contesto a tutta l'app */}
+        <AuthContextProvider>
+          <Router>
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
 
-          <Route path="/ProductionOrder" element={<ProductionOrderPage />} />
-          <Route path="/ProductionOrder/:id" element={<ProductionOrderViewPage />} />
+              <Route path="/inventory" element={<InventoryPage />} />
+              <Route path="/inventory/edit/:id" element={<InventoryEditPage />} />
+              <Route path="/inventory/view/:id" element={<InventoryViewPage />} />
+              <Route path="/inventory/create" element={<InventoryCreatePage />} />
+              <Route path="/inventory/scanner" element={<InventoryScanPage />} />
 
-          <Route path="/BOM" element={<BomPage />} />
-        </Routes>
-      </Router>
-    </ThemeProvider>
+              <Route path="/ProductionOrder" element={<ProductionOrderPage />} />
+              <Route path="/ProductionOrder/:id" element={<ProductionOrderViewPage />} />
+
+              <Route path="/BOM" element={<BomPage />} />
+            </Routes>
+          </Router>
+        </AuthContextProvider>
+      </ThemeProvider>
   );
 }
 
