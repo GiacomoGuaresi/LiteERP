@@ -9,6 +9,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter()
 
+@router.get("/me", response_model=User)
+def read_current_user(
+    current_user: User = Depends(get_current_user),
+):
+    return current_user
 
 @router.get("/{item_id}", response_model=User)
 def read_one(
