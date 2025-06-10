@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from sqlalchemy.orm import Session
-from models import ProductionOrder, BillOfMaterials, ProductionOrderDetails, Inventory
+from models import User, ProductionOrder, BillOfMaterials, ProductionOrderDetails, Inventory
 from database import get_session
 from pydantic import BaseModel
+from auth import get_current_user
 
 router = APIRouter()
 
@@ -17,7 +18,11 @@ def update_production_order_status_backend(item_id: int, new_status: str, sessio
 
 
 @router.post("/", response_model=ProductionOrder)
-def create_productionOrder(item: ProductionOrder, session: Session = Depends(get_session)):
+def create_productionOrder(
+    item: ProductionOrder,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
     session.add(item)
 
     boms = session.query(BillOfMaterials).filter(
@@ -74,7 +79,12 @@ def read_one(item_id: int, session: Session = Depends(get_session)):
 
 
 @router.put("/{item_id}", response_model=ProductionOrder)
-def update(item_id: int, new_data: ProductionOrder, session: Session = Depends(get_session)):
+def update(
+    item_id: int,
+    new_data: ProductionOrder,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
     item = session.get(ProductionOrder, item_id)
     if not item:
         raise HTTPException(status_code=404, detail="Not found")
@@ -87,7 +97,11 @@ def update(item_id: int, new_data: ProductionOrder, session: Session = Depends(g
 
 
 @router.delete("/{item_id}")
-def delete(item_id: int, session: Session = Depends(get_session)):
+def delete(
+    item_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
     item = session.get(ProductionOrder, item_id)
     if not item:
         raise HTTPException(status_code=404, detail="Not found")
@@ -114,7 +128,12 @@ def delete(item_id: int, session: Session = Depends(get_session)):
 
 
 @router.post("/{item_id}/updateStatus", response_model=ProductionOrder)
-def update_status(item_id: int, payload: StatusUpdateRequest, session: Session = Depends(get_session)):
+def update_status(
+    item_id: int,
+    payload: StatusUpdateRequest,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
     valid_statuses = ["Planned", "In Progress", "Completed"]
     if payload.new_status not in valid_statuses:
         raise HTTPException(

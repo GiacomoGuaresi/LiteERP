@@ -9,6 +9,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter()
 
+
 @router.get("/{item_id}", response_model=User)
 def read_one(
     item_id: int,
@@ -29,6 +30,7 @@ def register(user: User):
         session.commit()
         session.refresh(user)
         return {"msg": "User registered"}
+
 
 @router.post("/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
