@@ -53,7 +53,7 @@ app.include_router(logs.router, prefix="/logs", tags=["Logs"])
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://liteerp.local:8000/"],  # frontend React
+    allow_origins=["http://localhost:3000", "http://liteerp.local:3000/"],  # frontend React
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
