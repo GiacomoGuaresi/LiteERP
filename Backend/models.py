@@ -8,7 +8,7 @@ class Inventory(SQLModel, table=True):
     quantity_on_hand: int
     quantity_locked: int
     category: str
-    image: Optional[str] = None  # oppure blob, ma come string base64
+    image: Optional[str] = None
     datas: Optional[str] = None
 
 class BillOfMaterials(SQLModel, table=True):
