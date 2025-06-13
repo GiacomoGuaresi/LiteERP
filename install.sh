@@ -4,8 +4,9 @@ sudo apt install -y nodejs npm python3 python3-venv python3-pip
 
 echo "⬇️ Installazione dipendenze Frontend..."
 cd ./Frontend
-
+echo "REACT_APP_API_URL=http://localhost:8000" > .env
 sudo npm install
+sudo npm run build
 cd ..
 
 echo "🐍 Creazione virtualenv e installazione Backend..."

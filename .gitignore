@@ -28,3 +28,4 @@ yarn-error.log*
 **/database.db
 
 **/venv
+**/.env
