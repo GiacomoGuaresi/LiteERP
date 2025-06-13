@@ -14,7 +14,7 @@ source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 deactivate
-cd..
+cd ..
 
 echo "🛠️ Creazione servizi systemd..."
 CURRENT_DIR=$(pwd)
