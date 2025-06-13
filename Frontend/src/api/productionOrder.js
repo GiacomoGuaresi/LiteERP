@@ -1,7 +1,7 @@
 // src/api/producutionOrder.js
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000'; // Cambia se usi una porta diversa
+const API_URL = process.env.REACT_APP_API_URL; // Cambia se usi una porta diversa
 
 export const getProductionOrders = () => axios.get(`${API_URL}/orders/`);
 export const getProductionOrder = (id) => axios.get(`${API_URL}/orders/${id}`);

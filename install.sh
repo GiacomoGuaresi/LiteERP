@@ -4,6 +4,7 @@ sudo apt install -y nodejs npm python3 python3-venv python3-pip
 
 echo "⬇️ Installazione dipendenze Frontend..."
 cd ./Frontend
+
 sudo npm install
 cd ..
 

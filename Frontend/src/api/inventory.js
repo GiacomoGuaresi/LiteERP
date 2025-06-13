@@ -1,7 +1,7 @@
 // src/api/inventory.js
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000'; // Cambia se usi una porta diversa
+const API_URL = process.env.REACT_APP_API_URL; // Cambia se usi una porta diversa
 
 export const getInventory = () => axios.get(`${API_URL}/inventory/`);
 export const createInventoryItem = (data) => axios.post(`${API_URL}/inventory/`, data);
