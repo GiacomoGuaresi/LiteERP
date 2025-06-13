@@ -1,7 +1,7 @@
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, navi } from 'react';
 import { AppBar, Toolbar, Typography, Button, Avatar, IconButton, Menu, MenuItem } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import logo from '../logo.svg';
 
@@ -9,6 +9,7 @@ const Navbar = () => {
   const { isLoggedIn, user, logout } = useContext(AuthContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const navigate = useNavigate();
 
   const getUserInitials = (name, surname) => {
     if (!name || !surname) return '';
@@ -28,6 +29,12 @@ const Navbar = () => {
     handleClose();
   };
 
+  const handleProfileClick = () => {
+    handleClose();
+    navigate('/profile');
+  };
+
+
   return (
     <AppBar position="static">
       <Toolbar>
@@ -42,6 +49,7 @@ const Navbar = () => {
             <Button color="inherit" component={Link} to="/inventory">Inventory</Button>
             <Button color="inherit" component={Link} to="/productionOrder">Production Order</Button>
             <Button color="inherit" component={Link} to="/BOM">BOM</Button>
+            <Button color="inherit" component={Link} to="/users">Users</Button>
             {user && (
               <IconButton
                 aria-label="account of current user"
@@ -79,13 +87,13 @@ const Navbar = () => {
               open={open}
               onClose={handleClose}
             >
+              <MenuItem onClick={handleProfileClick}>My Profile</MenuItem>
               <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </>
         ) : (
           <>
             <Button color="inherit" component={Link} to="/login">Login</Button>
-            <Button color="inherit" component={Link} to="/register">Register</Button>
           </>
         )}
       </Toolbar>

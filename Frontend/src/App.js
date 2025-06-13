@@ -7,7 +7,8 @@ import { AuthContextProvider } from './contexts/AuthContext'; // Importa AuthCon
 import Dashboard from './pages/Dashboard';
 
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import MyUserPage from './pages/MyUserPage'
+import UsersPage from './pages/UsersPage'
 
 import InventoryPage from './pages/InventoryPage';
 import InventoryViewPage from './pages/InventoryViewPage';
@@ -45,7 +46,8 @@ function App() {
               <Route path="/" element={<Dashboard />} />
               
               <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/profile" element={<MyUserPage />} />
+              <Route path="/users" element={<UsersPage />} />
 
               <Route path="/inventory" element={<InventoryPage />} />
               <Route path="/inventory/edit/:id" element={<InventoryEditPage />} />

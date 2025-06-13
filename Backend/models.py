@@ -41,7 +41,6 @@ class User(SQLModel, table=True):
     password: str
     name: str
     surname: str
-    pin: str
 
 class Logs (SQLModel, table=True):
     ID: Optional[int] = Field(default=None, primary_key=True)

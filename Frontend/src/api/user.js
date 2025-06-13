@@ -2,9 +2,11 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:8000';
 
+export const getUsers = () => axios.get(`${API_URL}/users/`)
+
 export const login = async (email, password) => {
   const params = new URLSearchParams();
-  params.append('username', email); 
+  params.append('username', email);
   params.append('password', password);
 
   return axios.post(`${API_URL}/users/login`, params, {
@@ -15,7 +17,7 @@ export const login = async (email, password) => {
 };
 
 export const register = (user) => {
-  return axios.post(`${API_URL}/users/register`, user);
+  return axios.post(`${API_URL}/users/`, user);
 };
 
 export const getUserById = (id, token) => {
@@ -26,5 +28,8 @@ export const getUserById = (id, token) => {
   });
 };
 
-
 export const getMe = () => axios.get(`${API_URL}/users/me`);
+
+export const updateUser = (id, data) => axios.put(`${API_URL}/users/${id}`, data);
+
+export const deleteUser = (id) => axios.delete(`${API_URL}/users/${id}`);
