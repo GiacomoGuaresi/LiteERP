@@ -26,3 +26,5 @@ yarn-error.log*
 
 # Database files
 **/database.db
+
+**/venv
