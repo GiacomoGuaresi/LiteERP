@@ -7,6 +7,9 @@ from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.openapi.models import SecurityScheme as SecuritySchemeModel
 from fastapi.openapi.models import OAuthFlowPassword as OAuthFlowPasswordModel
 
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from database import create_db_and_tables
 
 app = FastAPI(
     title="Il mio API FastAPI",
@@ -29,6 +32,17 @@ app = FastAPI(
         ]
     }
 )
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Questa parte viene eseguita all'avvio
+    create_db_and_tables()
+    yield
+    # Questa parte viene eseguita alla chiusura (opzionale)
+
+app = FastAPI(lifespan=lifespan)
+
+
 
 app.include_router(inventory.router, prefix="/inventory", tags=["Inventory"])
 app.include_router(bom.router, prefix="/bom", tags=["Bill of Materials"])
