@@ -2,18 +2,18 @@
 import React, { useEffect, useState } from 'react';
 import {
   Container, Typography, Card, CardContent, CardActions, IconButton, Button,
-  Dialog, DialogTitle, DialogContent, DialogActions, Grid, TextField, Box
+  Dialog, DialogTitle, DialogContent, DialogActions, Grid, TextField, Box,
+  FormControl, InputLabel, Select, MenuItem, CircularProgress
 } from '@mui/material';
+
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import ViewIcon from '@mui/icons-material/Visibility';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import SearchIcon from '@mui/icons-material/Search';
 import BarcodeReaderIcon from '@mui/icons-material/BarcodeReader';
-import { CircularProgress } from '@mui/material';
 
-import { getInventory, deleteInventoryItem, addToInventory, removeFromInventory } from '../api/inventory';
+import { getInventory, deleteInventoryItem, addToInventory, removeFromInventory, createInventoryItem, updateInventoryItem } from '../api/inventory';
 
 const InventoryPage = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -22,6 +22,17 @@ const InventoryPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [quantities, setQuantities] = useState({});
   const [loading, setLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editItem, setEditItem] = useState(null);
+  const [formData, setFormData] = useState({
+    code: '',
+    quantity_on_hand: 0,
+    quantity_locked: 0,
+    category: '',
+    datas: '{}',
+    image: ''
+  });
+  const [error, setError] = useState('');
 
   const loadInventory = async () => {
     setLoading(true);
@@ -40,6 +51,36 @@ const InventoryPage = () => {
     }
   };
 
+  const openNewItemDialog = () => {
+    setEditItem(null);
+    setFormData({
+      code: '',
+      quantity_on_hand: 0,
+      quantity_locked: 0,
+      category: '',
+      datas: '{}',
+      image: ''
+    });
+    setDialogOpen(true);
+  };
+
+  const openEditItemDialog = (item) => {
+    setEditItem(item);
+    setFormData({
+      code: item.code || '',
+      quantity_on_hand: item.quantity_on_hand || 0,
+      quantity_locked: item.quantity_locked || 0,
+      category: item.category || '',
+      datas: item.datas || '{}',
+      image: item.image || ''
+    });
+    setDialogOpen(true);
+  };
+
+  const handleFormChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
 
   const confirmDelete = (id) => {
     setItemToDelete(id);
@@ -55,8 +96,21 @@ const InventoryPage = () => {
     }
   };
 
-  const handleEdit = (id) => window.location.href = `/inventory/edit/${id}`;
-  const handleView = (id) => window.location.href = `/inventory/view/${id}`;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, image: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
 
   const handleQuantityChange = (id, value) => {
@@ -91,6 +145,28 @@ const InventoryPage = () => {
       });
   };
 
+  const handleSaveItem = async () => {
+    try {
+      if (!formData.code || !formData.category) {
+        alert("Code and Category are required.");
+        return;
+      }
+
+      if (!editItem) {
+        await createInventoryItem(formData);
+      } else {
+        await updateInventoryItem(editItem.ID, formData);
+      }
+
+      setDialogOpen(false);
+      loadInventory();
+    } catch (err) {
+      console.error('Errore salvataggio utente', err);
+      alert('Errore durante il salvataggio');
+    }
+  };
+
+
   useEffect(() => {
     loadInventory();
   }, []);
@@ -115,7 +191,7 @@ const InventoryPage = () => {
           <Button
             startIcon={<AddIcon />}
             variant="contained"
-            onClick={() => window.location.href = '/inventory/create'}
+            onClick={openNewItemDialog}
           >
             New Item
           </Button>
@@ -178,8 +254,7 @@ const InventoryPage = () => {
                     />
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <IconButton onClick={() => handleView(item.ID)}><ViewIcon /></IconButton>
-                    <IconButton onClick={() => handleEdit(item.ID)}><EditIcon /></IconButton>
+                    <IconButton onClick={() => openEditItemDialog(item)}><EditIcon /></IconButton>
                     <IconButton onClick={() => confirmDelete(item.ID)}><DeleteIcon /></IconButton>
                   </Box>
                 </CardActions>
@@ -195,6 +270,54 @@ const InventoryPage = () => {
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
           <Button onClick={performDelete} color="error">Delete</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog creazione/modifica */}
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
+        <DialogTitle>{editItem ? 'Edit User' : 'New User'}</DialogTitle>
+        <DialogContent>
+          <TextField label="Code" name="code" value={formData.code} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+          <TextField label="Quantity on Hand" name="quantity_on_hand" type="number" value={formData.quantity_on_hand} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+          <TextField label="Quantity Locked" name="quantity_locked" type="number" value={formData.quantity_locked} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>Category</InputLabel>
+            <Select name="category" value={formData.category} onChange={handleChange} label="Category" required>
+              <MenuItem value="Product">Product</MenuItem>
+              <MenuItem value="Component">Component</MenuItem>
+              <MenuItem value="PrintedPart">PrintedPart</MenuItem>
+              <MenuItem value="Subassembly">Subassembly</MenuItem>
+            </Select>
+          </FormControl>
+
+          <TextField
+            label="Datas (JSON)"
+            name="datas"
+            value={formData.datas}
+            onChange={handleChange}
+            fullWidth
+            multiline
+            minRows={3}
+            sx={{ mb: 2 }}
+            error={!!error}
+            helperText={error}
+          />
+
+          <Button variant="contained" component="label" sx={{ mb: 2 }}>
+            Upload Image
+            <input type="file" hidden onChange={handleImageChange} accept="image/*" />
+          </Button>
+
+          {formData.image && (
+            <Box sx={{ mb: 2 }}>
+              <img src={formData.image} alt="Preview" style={{ maxWidth: '200px' }} />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleSaveItem}>{editItem ? 'Save' : 'Create'}</Button>
         </DialogActions>
       </Dialog>
     </Container>
