@@ -29,11 +29,8 @@ def create_db_and_tables():
             )
             session.add(admin)
             session.commit()
-
             print("✅ Admin user created:")
-            print("   Email: admin@example.com")
-            print(f"   Temporary password: {temp_password}")
-            
+
             # Esegui payload.sql dopo la creazione dell'admin
             with engine.connect() as conn:
                 with open("payload.sql", "r", encoding="utf-8") as f:
@@ -43,6 +40,13 @@ def create_db_and_tables():
                             conn.execute(text(stmt))
                     conn.commit()
                 print("📦 payload.sql eseguito.")
+
+            print("================================================")
+            print("Admin Crededential")
+            print("================================================")
+            print(f"Email: admin@example.com")
+            print(f"Password: {temp_password}")
+            print("================================================")
         else:
             print("ℹ️ Admin user already exists.")
 
