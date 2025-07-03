@@ -62,7 +62,7 @@ const BomPage = () => {
   };
 
   const handleAddChild = async () => {
-    const parentID = newParentMode ? parseInt(newChild) : selectedParent;
+    const parentID = newParentMode ? parseInt(selectedParent) : selectedParent;
 
     await createBOM({
       parentProductID: parentID,
@@ -162,21 +162,39 @@ const BomPage = () => {
         <DialogTitle>{newParentMode ? 'Create BOM' : 'Add Child Item'}</DialogTitle>
         <DialogContent>
           {newParentMode && (
-            <TextField
-              select
-              fullWidth
-              label="BOM Product"
-              value={newChild}
-              onChange={(e) => setNewChild(e.target.value)}
-              sx={{ mt: 2 }}
-            >
-              {inventoryItems.map(item => (
-                <MenuItem key={item.ID} value={item.ID}>
-                  {item.code}
-                </MenuItem>
-              ))}
-            </TextField>
+            <>
+              <TextField
+                select
+                fullWidth
+                label="Parent Product"
+                value={selectedParent || ''}
+                onChange={(e) => setSelectedParent(e.target.value)}
+                sx={{ mt: 2 }}
+              >
+                {inventoryItems.map(item => (
+                  <MenuItem key={item.ID} value={item.ID}>
+                    {item.code}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              <TextField
+                select
+                fullWidth
+                label="Child Product"
+                value={newChild}
+                onChange={(e) => setNewChild(e.target.value)}
+                sx={{ mt: 2 }}
+              >
+                {inventoryItems.map(item => (
+                  <MenuItem key={item.ID} value={item.ID}>
+                    {item.code}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </>
           )}
+
           {!newParentMode && (
             <TextField
               select
@@ -205,7 +223,11 @@ const BomPage = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleAddChild} variant="contained">
+          <Button
+            onClick={handleAddChild}
+            variant="contained"
+            disabled={parseInt(selectedParent) === parseInt(newChild)}
+          >
             {newParentMode ? 'Create' : 'Add'}
           </Button>
         </DialogActions>
