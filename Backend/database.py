@@ -38,7 +38,9 @@ def create_db_and_tables():
             with engine.connect() as conn:
                 with open("payload.sql", "r", encoding="utf-8") as f:
                     sql_payload = f.read()
-                    conn.execute(text(sql_payload))
+                    for stmt in sql_payload.strip().split(";"):
+                        if stmt.strip():  # ignora righe vuote
+                            conn.execute(text(stmt))
                     conn.commit()
                 print("📦 payload.sql eseguito.")
         else:
